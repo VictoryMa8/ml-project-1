@@ -8,19 +8,18 @@ def euclidean(point1, point2):
 pt1 ={'x': 20, 'y': 30, 'id': 'A1'}
 pt2 = {'x': 40, 'y': 50, 'id': 'B1'}
 
+shoppers = pd.read_csv("./online_shoppers_intention.csv", sep = ",")
+
 def main():
-    shoppers = pd.read_csv("./online_shoppers_intention.csv", sep = ",")
-    
     # subset1, less variables
     subset1_columns = ["Administrative", "Month", "OperatingSystems", "Browser", "Region", "VisitorType", "Weekend", "Revenue"]
     subset1 = shoppers[subset1_columns]
-    print(subset1)
 
-    # subset2, even less
+    # subset2, even less variables
     subset2_columns = ["Browser", "Region", "VisitorType", "Revenue"]
     subset2 = subset1[subset2_columns]
-    print(subset2)
 
+    # group by visitor type
     print(subset2.groupby(by = "VisitorType").count())
 
 if __name__ == "__main__":
