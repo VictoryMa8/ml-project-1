@@ -1,5 +1,6 @@
 import pandas as pd
 import seaborn as sns
+import numpy as np
 
 iris = sns.load_dataset('iris')
 
@@ -70,8 +71,46 @@ def main():
     # there are rules for which operators are evaluated first
     # use parengtheses to make sure everything is evaluated in the order you want
 
-    # use | or & for a combination of conditions
+    # use | or & and parentheses for a combination of conditions
+    print(iris2[(iris2['petal_width'] >= 2.4) & (iris2['petal_length'] >= 6.0)])
 
+    # query() can make this slightly easier
+    # we put the conditional in one big string, we don't have to use quotes for variables
+    print(iris2.query('(petal_width >= 2.4) & (petal_length >= 6.0)'))
+
+    # if we want a categorical variable to be a certain value, we use ""
+    print(iris2.query('(species == "virginica") & (petal_length >= 6.4)'))
+
+    # usually loc is the best way to subset, otherwise query() is best if performance isn't an issue
+
+    # chain functions like so
+    big_virginicas = (
+        iris2.query('(species == "virginica") & (petal_length >= 6.6)').
+        copy(deep=True).
+        sort_values('petal_length') # see the periods
+    )
+    print(big_virginicas)
+
+    # change data like this
+    big_virginicas['petal_length'] = big_virginicas['petal_length'] * 2
+    print(big_virginicas)
+
+    # create an indicator variable
+    # is_huge indicates if the petal width is 2.2 or bigger
+    big_virginicas['is_huge'] = (big_virginicas['petal_width'] >= 2.2)
+    print(big_virginicas)
+
+    # NaN is defined by the numpy package
+    # detect missing values using isna() or notna()
+
+    # where() takes three arguments: a condition, result if true, result if false
+    big_virginicas['is_alright_lookin'] = np.where(
+        big_virginicas['sepal_length'] >= 7.7,
+        'alright_lookin',
+        'not_alright'
+    )
+
+    print(big_virginicas)
 
 if __name__ == "__main__":
     main()
