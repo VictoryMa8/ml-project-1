@@ -1,5 +1,8 @@
+import seaborn as sns
+import matplotlib.pyplot as plt
 import math
 import pandas as pd
+import numpy
 
 def euclidean(point1, point2):
   distance = math.sqrt((point1["x"] - point2["x"])**2 + (point1["y"] - point2["y"])**2)   # euclidean distance formula
@@ -20,7 +23,7 @@ def main():
     subset2 = subset1[subset2_columns]
 
     # group by visitor type
-    print(subset2.groupby(by = "VisitorType").count())
+    print(subset2)
 
 if __name__ == "__main__":
     main()
