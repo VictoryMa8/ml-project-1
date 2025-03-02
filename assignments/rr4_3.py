@@ -47,9 +47,16 @@ def main():
     # understand the distribution of a continous variable
     print(diamonds['price'].describe())
 
-    # use plotnine (like ggplot2 from R for visualizations)
-    (p9.ggplot(diamonds, p9.aes(x = 'price')
-                      ) + p9.geom_histogram(binwidth = 1000)).save('plot1.png')
+    '''
+    use plotnine (like ggplot2 from R for visualizations)
+    (p9.ggplot(diamonds, p9.aes(x = 'price')) + p9.geom_histogram(binwidth = 1000)).save('plot1.png')
+
+    (p9.ggplot(diamonds, p9.aes(x = 'quality')) + p9.geom_bar()).save('plot2.png')
+    '''
+
+    # save a cleaned and changed data frame as a pickle
+    diamonds.to_pickle('diamonds2.pickle')
+    pd.read_pickle('diamonds2.pickle')
     
     
 if __name__ == "__main__":
