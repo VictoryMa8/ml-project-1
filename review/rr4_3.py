@@ -56,8 +56,6 @@ def main():
 
     # save a cleaned and changed data frame as a pickle
     diamonds.to_pickle('diamonds2.pickle')
-    pd.read_pickle('diamonds2.pickle')
-    
     
 if __name__ == "__main__":
     main()
