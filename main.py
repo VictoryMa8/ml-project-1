@@ -15,7 +15,8 @@ def main():
   subset1_columns = ["Browser", "Region", "VisitorType", "Revenue"]
   subset1 = shoppers[subset1_columns]
   # group by visitor type
-  print(subset1)
+  # print(subset1)
+  print(subset1.value_counts())
 
 if __name__ == "__main__":
     main()
