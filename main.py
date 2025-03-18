@@ -11,12 +11,14 @@ def euclidean(point1, point2):
 shoppers = pd.read_csv("./online_shoppers_intention.csv", sep = ",")
 
 def main():
-  # subset1, less variables
-  subset1_columns = ["Browser", "Region", "VisitorType", "Revenue"]
-  subset1 = shoppers[subset1_columns]
-  # group by visitor type
-  # print(subset1)
-  print(subset1.value_counts())
+  print(shoppers)
+
+  sns.histplot(data = shoppers, x = 'VisitorType')
+  plt.show()
+
+  sns.scatterplot(data = shoppers, x = 'Administrative', y = 'Informational')
+  plt.show()
+
 
 if __name__ == "__main__":
     main()
