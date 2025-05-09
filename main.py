@@ -17,6 +17,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 # STEP 0: Loading in the data!!
 shoppers = pd.read_csv("./online_shoppers_intention.csv", sep = ",")
+# Our dataset contains info on online shopping sessions and whether or not they resulted in some revenue for the business
 
 
 # EDA: Looking at the data:
@@ -32,6 +33,7 @@ print('Missing values in each column:')
 print(missing_values[missing_values > 0])
 if missing_values.sum() == 0:
     print("No missing values found! Yahooo!")
+    # Yeah we got no missing values, this will make it easier for us
 else:
     print("Missing values found... uh oh")
 # check for strange values like na, NA, n/a, etc.
@@ -47,6 +49,7 @@ for col in shoppers.columns:
                 strange_counts[col][strange_val] = count
 if not strange_counts:
     print("No weird placeholder values found yippeee") 
+    # We in fact found no weird placeholder values, this makes it easier for us
 else:
     print(f"Found potentially strange values: {strange_counts}")
 
@@ -63,6 +66,8 @@ revenue_counts = shoppers['Revenue'].value_counts()
 revenue_percentage = shoppers['Revenue'].value_counts(normalize=True) * 100
 print(revenue_counts)
 print(revenue_percentage)
+# Our target variable is pretty imbalanced, only 15.47% of sessions resulted in some revenue
+# We have to be careful about model evaluation metrics and tradeoffs between precision and recall
 
 # EDA: Visualizations:
 # histogram for a numerical feature
@@ -70,22 +75,31 @@ print('EDA: Visualizations:')
 sns.histplot(data=shoppers, x='PageValues', kde=True)
 plt.title('distribution of pagevalues')
 plt.show()
+# PageValues shows heavy right skew, most sessions have low values
+
 # count plot for a categorical feature
 sns.countplot(data=shoppers, x='VisitorType')
 plt.title('distribution of visitortype')
 plt.show()
+# Most visitors are returning visitors, customer retention is important?
+
 # count plot for target variable
 sns.countplot(data=shoppers, x='Revenue')
 plt.title('distribution of revenue (target)')
 plt.show()
+# Class imbalance in our target variable
+
 # scatter plot for two numerical features
 sns.scatterplot(data=shoppers, x='BounceRates', y='ExitRates', hue='Revenue')
 plt.title('bouncerates vs. exitrates by revenue')
 plt.show()
+# BounceRates has a moderate/high positive correlation with ExitRates
+
 # box plot for a numerical feature grouped by a categorical feature
 sns.boxplot(data=shoppers, x='VisitorType', y='PageValues', hue='Revenue')
 plt.title('pagevalues by visitortype and revenue')
 plt.show()
+
 # correlation heatmap for numerical features
 # selecting only numeric types for correlation calculation
 numerical_cols_for_corr = shoppers.select_dtypes(include=np.number).columns
@@ -104,19 +118,23 @@ if shoppers['Revenue'].nunique() == 2 and True in shoppers['Revenue'].values and
         ttest_result_bounce = pg.ttest(revenue_true_bounce, revenue_false_bounce, correction=True)
         print('t-test result for bounce rates between revenue groups:')
         print(ttest_result_bounce)
+# Significant difference in bounce rates between revenue groups (p < 0.001)
+
 # ANOVA for page values across visitor types
 anova_data_pv = shoppers[['PageValues', 'VisitorType']].dropna()
 if anova_data_pv['VisitorType'].nunique() > 1 and len(anova_data_pv) > anova_data_pv['VisitorType'].nunique():
     anova_result_pagevalues = pg.anova(dv='PageValues', between='VisitorType', data=anova_data_pv)
     print('anova result for pagevalues across visitor types:')
     print(anova_result_pagevalues)
+# Significant difference in PageValues across visitor types (p < 1e-39)
+
 # ANOVA for administrative duration across visitor types
 anova_data_ad = shoppers[['Administrative_Duration', 'VisitorType']].dropna()
 if anova_data_ad['VisitorType'].nunique() > 1 and len(anova_data_ad) > anova_data_ad['VisitorType'].nunique():
     anova_result_admin_dur = pg.anova(dv='Administrative_Duration', between='VisitorType', data=anova_data_ad)
     print('anova result for administrative duration across visitor types:')
     print(anova_result_admin_dur)
-
+# Significant relationship between visitor type and administrative duration (p = 0.014)
 
 # DATA CLEANING & WRANGLING:
 print('DATA CLEANING & WRANGLING:')
@@ -138,6 +156,7 @@ if 'Weekend' in shoppers.columns and shoppers['Weekend'].dtype == 'bool' and 'We
     categorical_features.append('Weekend')
 print(f"Categorical features for encoding: {categorical_features}")
 print(f"Numerical features for scaling: {numerical_features}")
+# We have a lot of observations, which is super great
 
 # define feature set x and target y
 features = numerical_features + categorical_features
@@ -177,7 +196,7 @@ print('SPLITTING THE DATA (70%/30%)')
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=777, stratify=y)
 print(f"Training set shape: x={x_train.shape}, y={y_train.shape}")
 print(f"Testing set shape: x={x_test.shape}, y={y_test.shape}")
-
+# A 70/30 split gives a good amount of data for both training and testing
 
 # MODEL SELECTION
 print('MODEL SELECTION:')
@@ -205,6 +224,7 @@ print("Confusion matrix:")
 print(confusion_matrix(y_test, y_pred_null))
 print("Classification report:")
 print(classification_report(y_test, y_pred_null, zero_division=0, target_names=['No Revenue', 'Revenue']))
+# Baseline model achieves 84.5% accuracy by simply predicting majority class, but it captures 0% of sessions that gave us revenue, so this is useless to us and our objective
 
 # logistic regression training and evaluation with hyperparameter tuning
 print("Evaluating logistic regression...")
@@ -237,6 +257,8 @@ print("confusion matrix:") # source: [310, 391]
 print(confusion_matrix(y_test, y_pred_lr))
 print("classification report:")
 print(classification_report(y_test, y_pred_lr, zero_division=0, target_names=['No Revenue', 'Revenue']))
+# Logistic regression has high precision (75%) but low recall (37%)
+# it could be missing potential revenue generating customers for us
 
 # random forest training and evaluation with hyperparameter tuning
 print("Evaluating random forest...")
@@ -274,6 +296,7 @@ print("Confusion matrix:") # source: [310, 391]
 print(confusion_matrix(y_test, y_pred_rf))
 print("Classification report:")
 print(classification_report(y_test, y_pred_rf, zero_division=0, target_names=['No Revenue', 'Revenue']))
+# has great accuracy at 90.67%, and significant improved recall at 55.76%. F1-score also increases from 0.50 to 0.65, so it's overall better for predicting class
 
 
 # MODEL EVALUATION & COMPARISON
@@ -282,7 +305,7 @@ if len(np.unique(y_test)) > 1:
     print(f"Null model ROC-AUC: {roc_auc_score(y_test, y_prob_null)}")
     print(f"Logistic regression ROC-AUC: {roc_auc_score(y_test, y_prob_lr)}")
     print(f"Random forest ROC-AUC: {roc_auc_score(y_test, y_prob_rf)}")
-
+# Our Random Forest Classifier achieved the highest ROC-AUC of 0.94, significantly outperforming other models
 
     # plot roc curves
     fpr_null, tpr_null, _ = roc_curve(y_test, y_prob_null)
@@ -319,7 +342,7 @@ if len(all_feature_names) == len(importances):
 
     print("top 10 important features from random forest:")
     print(feature_importance_df.head(10))
-
+    # Page values is, quite possibly the most important feature at 53%, while exit rates, product related browsing, and administrative duration also contribute significantly
 
     # plot feature importance
     plt.figure(figsize=(10, 8))
@@ -327,3 +350,4 @@ if len(all_feature_names) == len(importances):
     plt.title('top 15 feature importances (random forest)')
     plt.tight_layout()
     plt.show()
+    # Concluding insights: Focus on optimizing these high value pages and developing strategies to guide customners to these pages in order to maximize profit
